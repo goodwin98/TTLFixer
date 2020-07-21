@@ -200,6 +200,18 @@ public class MainService extends Service {
                 successNotification();
             else
                 errorNotification(output, error);
+            
+            ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A POSTROUTING -j TTL --ttl-inc 1"});
+            ttl_fix_code = ttl_fix.waitFor();
+
+            outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
+            errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
+            output = outputScanner.hasNext() ? outputScanner.next() : "";
+            error = errorScanner.hasNext() ? errorScanner.next() : "";
+            if(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)
+                successNotification();
+            else
+                errorNotification(output, error);
         } catch (IOException | InterruptedException e) {
             errorNotification(e.toString(), "");
         }
