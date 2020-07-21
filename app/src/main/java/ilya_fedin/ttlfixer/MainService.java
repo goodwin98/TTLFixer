@@ -33,19 +33,24 @@ public class MainService extends Service {
         NewNotification.notify(context, "result_notification", notificationText);
     }
 
+    private void checkRunning(Process ttl_fix) throws IOException, InterruptedException
+    {
+        int ttl_fix_code = ttl_fix.waitFor();
+
+        Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
+        Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
+        String output = outputScanner.hasNext() ? outputScanner.next() : "";
+        String error = errorScanner.hasNext() ? errorScanner.next() : "";
+        if(!(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
+            System.exit(0);
+        }
+    }
+
     private void createChain() {
         try {
             Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -N TTLFixer"});
-            int ttl_fix_code = ttl_fix.waitFor();
-
-            Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
-            Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
-            String output = outputScanner.hasNext() ? outputScanner.next() : "";
-            String error = errorScanner.hasNext() ? errorScanner.next() : "";
-            if(!(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)) {
-                if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
-                System.exit(0);
-            }
+            checkRunning(ttl_fix);
         } catch (IOException | InterruptedException e) {
             if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
             System.exit(0);
@@ -53,16 +58,24 @@ public class MainService extends Service {
 
         try {
             Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A POSTROUTING -j TTLFixer"});
-            int ttl_fix_code = ttl_fix.waitFor();
+            checkRunning(ttl_fix);
+        } catch (IOException | InterruptedException e) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
+            System.exit(0);
+        }
+    }
+    private void createChain2() {
+        try {
+            Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -N TTLFixer2"});
+            checkRunning(ttl_fix);
+        } catch (IOException | InterruptedException e) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
+            System.exit(0);
+        }
 
-            Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
-            Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
-            String output = outputScanner.hasNext() ? outputScanner.next() : "";
-            String error = errorScanner.hasNext() ? errorScanner.next() : "";
-            if(!(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)) {
-                if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
-                System.exit(0);
-            }
+        try {
+            Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A PREROUTING -j TTLFixer2"});
+            checkRunning(ttl_fix);
         } catch (IOException | InterruptedException e) {
             if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
             System.exit(0);
@@ -72,16 +85,16 @@ public class MainService extends Service {
     private void flushChain() {
         try {
             Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -F TTLFixer"});
-            int ttl_fix_code = ttl_fix.waitFor();
-
-            Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
-            Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
-            String output = outputScanner.hasNext() ? outputScanner.next() : "";
-            String error = errorScanner.hasNext() ? errorScanner.next() : "";
-            if(!(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)) {
-                if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
-                System.exit(0);
-            }
+            checkRunning(ttl_fix);
+        } catch (IOException | InterruptedException e) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
+            System.exit(0);
+        }
+    }
+    private void flushChain2() {
+        try {
+            Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -F TTLFixer2"});
+            checkRunning(ttl_fix);
         } catch (IOException | InterruptedException e) {
             if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
             System.exit(0);
@@ -91,16 +104,7 @@ public class MainService extends Service {
     private void removeChain() {
         try {
             Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -D POSTROUTING -j TTLFixer"});
-            int ttl_fix_code = ttl_fix.waitFor();
-
-            Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
-            Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
-            String output = outputScanner.hasNext() ? outputScanner.next() : "";
-            String error = errorScanner.hasNext() ? errorScanner.next() : "";
-            if(!(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)) {
-                if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
-                System.exit(0);
-            }
+            checkRunning(ttl_fix);
         } catch (IOException | InterruptedException e) {
             if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
             System.exit(0);
@@ -110,16 +114,26 @@ public class MainService extends Service {
 
         try {
             Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -X TTLFixer"});
-            int ttl_fix_code = ttl_fix.waitFor();
+            checkRunning(ttl_fix);
+        } catch (IOException | InterruptedException e) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
+            System.exit(0);
+        }
+    }
+    private void removeChain2() {
+        try {
+            Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -D PREROUTING -j TTLFixer2"});
+            checkRunning(ttl_fix);
+        } catch (IOException | InterruptedException e) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
+            System.exit(0);
+        }
 
-            Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
-            Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
-            String output = outputScanner.hasNext() ? outputScanner.next() : "";
-            String error = errorScanner.hasNext() ? errorScanner.next() : "";
-            if(!(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)) {
-                if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
-                System.exit(0);
-            }
+        flushChain();
+
+        try {
+            Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -X TTLFixer2"});
+            checkRunning(ttl_fix);
         } catch (IOException | InterruptedException e) {
             if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
             System.exit(0);
@@ -143,6 +157,29 @@ public class MainService extends Service {
             }
 
             exist = output.contains("-N TTLFixer");
+        } catch (IOException | InterruptedException e) {
+            if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
+            System.exit(0);
+        }
+        return exist;
+    }
+    private boolean isChainExists2() {
+        boolean exist = false;
+        try {
+            Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -S"});
+            int ttl_fix_code = ttl_fix.waitFor();
+
+            Scanner outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
+            Scanner errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
+            String output = outputScanner.hasNext() ? outputScanner.next() : "";
+            String error = errorScanner.hasNext() ? errorScanner.next() : "";
+
+            if(!(error.isEmpty() && ttl_fix_code == 0)) {
+                if(Integer.parseInt(ttl) != 0) errorNotification(output, error);
+                System.exit(0);
+            }
+
+            exist = output.contains("-N TTLFixer2");
         } catch (IOException | InterruptedException e) {
             if(Integer.parseInt(ttl) != 0) errorNotification(e.toString(), "");
             System.exit(0);
@@ -188,6 +225,12 @@ public class MainService extends Service {
             else createChain();
         }
 
+        if (isChainExists2()) {
+           flushChain2();
+        } else {
+            createChain2();
+        }
+
         try {
             Process ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A TTLFixer -j TTL --ttl-set " + ttl});
             int ttl_fix_code = ttl_fix.waitFor();
@@ -200,18 +243,9 @@ public class MainService extends Service {
                 successNotification();
             else
                 errorNotification(output, error);
-            
-            ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A POSTROUTING -j TTL --ttl-inc 1"});
-            ttl_fix_code = ttl_fix.waitFor();
 
-            outputScanner = new Scanner(ttl_fix.getInputStream()).useDelimiter("\\A");
-            errorScanner = new Scanner(ttl_fix.getErrorStream()).useDelimiter("\\A");
-            output = outputScanner.hasNext() ? outputScanner.next() : "";
-            error = errorScanner.hasNext() ? errorScanner.next() : "";
-            if(output.isEmpty() && error.isEmpty() && ttl_fix_code == 0)
-                successNotification();
-            else
-                errorNotification(output, error);
+            ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A TTLFixer2 -j TTL --ttl-inc 1 "});
+            checkRunning(ttl_fix);
         } catch (IOException | InterruptedException e) {
             errorNotification(e.toString(), "");
         }
