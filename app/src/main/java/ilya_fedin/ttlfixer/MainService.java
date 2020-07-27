@@ -246,6 +246,13 @@ public class MainService extends Service {
 
             ttl_fix = getRuntime().exec(new String[] {"su", "-c", "iptables -t mangle -A TTLFixer2 -j TTL --ttl-inc 1 "});
             checkRunning(ttl_fix);
+            ttl_fix = getRuntime().exec(new String[] {"su", "-c", "ip6tables -P INPUT DROP"});
+            checkRunning(ttl_fix);
+            ttl_fix = getRuntime().exec(new String[] {"su", "-c", "ip6tables -P FORWARD DROP"});
+            checkRunning(ttl_fix);
+            ttl_fix = getRuntime().exec(new String[] {"su", "-c", "ip6tables -P OUTPUT DROP"});
+            checkRunning(ttl_fix);
+
         } catch (IOException | InterruptedException e) {
             errorNotification(e.toString(), "");
         }
